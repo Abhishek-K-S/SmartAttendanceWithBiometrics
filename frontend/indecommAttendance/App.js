@@ -15,6 +15,7 @@ export default function App() {
     </NavigationContainer>
   );
 }
+//main app component
 
 const styles = StyleSheet.create({
   container: {
