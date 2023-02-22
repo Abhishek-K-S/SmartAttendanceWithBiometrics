@@ -27,7 +27,10 @@ const RegisterCameraScreen = ({ navigation }) => {
     useEffect(() => {
         if (record) {
             navigation.popToTop();
-            navigation.navigate('ViewScreen');
+            navigation.navigate('ViewScreen', {
+                uri: record,
+                navigation: navigation
+            });
         }
     }, [record, navigation]);
 
