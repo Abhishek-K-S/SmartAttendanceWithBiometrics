@@ -14,7 +14,10 @@ def face_extractor(img):
     return cropped_face
 
 cap = cv2.VideoCapture(0)
+t=type(cap)
+print(t)
 count = 0
+name=print("Enter your name")
 
 while True:
     ret, frame = cap.read()
