@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.topContainer}>
@@ -19,7 +19,7 @@ const HomeScreen = () => {
                         <Text style={styles.loginBtnText}>Login</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.loginBtn}>
+                    <TouchableOpacity onPress={() => { navigation.navigate('Register') }} style={styles.loginBtn}>
                         <Text style={styles.loginBtnText}>Register</Text>
                     </TouchableOpacity>
                 </View>
