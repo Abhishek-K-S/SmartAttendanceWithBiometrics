@@ -29,7 +29,7 @@ const RegisterCameraScreen = ({ navigation }) => {
             navigation.popToTop();
             navigation.navigate('ViewScreen', {
                 uri: record,
-                navigation: navigation
+                // navigation: navigation
             });
         }
     }, [record, navigation]);
