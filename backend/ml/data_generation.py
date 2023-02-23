@@ -1,7 +1,9 @@
 import cv2
 import os
 
-face_classifier = cv2.CascadeClassifier('/home/dharithri/indecommSmartAttendance/backend/ml/haarcascade_frontalface_default.xml')
+cascade_dir = os.path.join(os.path.dirname(cv2.__file__), "data", "haarcascade_frontalface_default.xml")
+
+face_classifier = cv2.CascadeClassifier( cascade_dir)
 
 def face_extractor(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
