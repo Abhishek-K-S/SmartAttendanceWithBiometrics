@@ -1,0 +1,172 @@
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useMemo, useState } from 'react';
+import { Video } from 'expo-av';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons'
+import LocationAcessComponent from '../components/LocationAcessComponent';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BottomSheet from "@gorhom/bottom-sheet";
+import { FAB } from 'react-native-elements';
+
+const ViewFinalVideoScreen = ({ route, navigation }) => {
+    const video = React.useRef(null);
+    const { uri } = route.params;
+
+    const [bottomSheetIndex, setbottomSheetIndex] = useState(0)
+
+
+    const snapPoints = useMemo(() => ["10%", "60%", "100%"], []);
+
+    const handleSheetChange = useCallback(
+        (index) => {
+            if (index === 0) {
+                setbottomSheetIndex(0)
+                console.log("done");
+            } else if (index !== 0 && bottomSheetIndex === 0) {
+                setbottomSheetIndex(index)
+            }
+        },
+        // [snapPoints]
+        [snapPoints, navigation]
+    );
+
+    return (
+
+
+        <SafeAreaProvider >
+            <SafeAreaView style={{ flex: 1, backgroundColor: "#1E254D" }}>
+                <GestureHandlerRootView style={{ flex: 1 }}>
+                    {/* <Text>{uri}</Text> */}
+
+
+                    <View style={styles.videoTitleContainer}>
+                        <Text style={{ color: "white", fontSize: 18 }}>Your Video</Text>
+                    </View>
+                    <Video
+                        ref={video}
+                        style={styles.video}
+                        source={{
+                            uri: uri,
+                        }}
+                        useNativeControls
+                        resizeMode="contain"
+                        isLooping
+                        shouldPlay
+                    // onPlaybackStatusUpdate={status => setStatus(() => status)}
+                    />
+
+                    <TouchableOpacity style={styles.locationTitleContainer} onPress={() => { setbottomSheetIndex(1) }}  >
+                        <View style={styles.confirmBtnContainer}>
+                            <Ionicons name='location' size={25} color="red" />
+                            <Text style={{ color: "black", fontSize: 18 }}>Confirm Location</Text>
+                        </View>
+                    </TouchableOpacity>
+                    {/* <View style={styles.locationCompWidth}>
+                        <LocationAcessComponent />
+                    </View> */}
+                    <View style={styles.videoControlBtns}>
+                        {/* <Text>Hello</Text> */}
+                        <TouchableOpacity style={styles.conditionBtn}>
+                            <Ionicons name='checkmark-circle' color="green" size={25} />
+                            <Text style={{ color: "black" }}>Proceed</Text>
+                        </TouchableOpacity>
+
+                        {/* <TouchableOpacity style={styles.retakeBtn} >
+                    <Ionicons name='refresh-circle' size={25} color="white" />
+                    <Text style={{ color: "white" }}>Retake</Text>
+                </TouchableOpacity> */}
+
+                        <TouchableOpacity style={styles.conditionBtn} >
+                            <Ionicons name='exit' size={25} color="red" />
+                            <Text style={{ color: "black" }}>Exit</Text>
+                        </TouchableOpacity>
+                    </View>
+
+
+                    <BottomSheet
+                        index={bottomSheetIndex}
+                        snapPoints={snapPoints}
+                        // footerComponent={CustomFooter}
+                        style={{ padding: 15 }}
+                        onChange={handleSheetChange}
+                    // backdropComponent={customBackdrop}
+                    >
+                        <LocationAcessComponent />
+                        <FAB icon={{ name: 'close', color: "white" }} color='#1E254D' size={25} placement='right' style={{ top: '-80%' }} onPress={() => { setbottomSheetIndex(0) }} />
+                    </BottomSheet>
+
+                </GestureHandlerRootView>
+            </SafeAreaView>
+        </SafeAreaProvider>
+    )
+}
+
+export default ViewFinalVideoScreen
+
+const styles = StyleSheet.create({
+    videoTitleContainer: {
+        // borderWidth: 2,
+        height: "5%",
+        justifyContent: "center",
+        paddingHorizontal: "3%",
+    },
+    video: {
+        alignSelf: 'center',
+        width: "100%",
+        height: "70%",
+    },
+
+    videoControlBtns: {
+        // borderWidth: 2,
+        height: "10%",
+        width: "100%",
+        flexDirection: 'row',
+        justifyContent: "space-around",
+        alignItems: "center",
+    },
+
+    conditionBtn: {
+        // borderWidth: 2,
+        width: "30%",
+        height: "50%",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 15,
+        backgroundColor: "white",
+        flexDirection: "row",
+    },
+
+    locationTitleContainer: {
+        // borderWidth: 2,
+        marginTop: '3%',
+        height: "4%",
+        justifyContent: "center",
+        paddingHorizontal: "3%",
+        alignItems: "center",
+        // width: "25%"
+    },
+    confirmBtnContainer: {
+        // borderWidth: 2,
+        backgroundColor: "white",
+        height: "100%",
+        alignItems: "center",
+        width: "50%",
+        flexDirection: 'row',
+        justifyContent: "space-around",
+        borderRadius: 15
+    },
+
+    locationCompWidth: {
+        // borderWidth: 2,
+        height: "30%"
+    },
+
+    myContainer: {
+        flex: 1,
+        padding: 24,
+        backgroundColor: 'grey',
+    },
+
+
+
+})

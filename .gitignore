@@ -1,0 +1,29 @@
+###frontend
+frontend/indecommAttendance/node_modules/
+frontend/indecommAttendance/.expo/
+frontend/indecommAttendance/dist/
+frontend/indecommAttendance/npm-debug.*
+frontend/indecommAttendance/*.jks
+frontend/indecommAttendance/*.p8
+frontend/indecommAttendance/*.p12
+frontend/indecommAttendance/*.key
+frontend/indecommAttendance/*.mobileprovision
+frontend/indecommAttendance/*.orig.*
+frontend/indecommAttendance/web-build/
+
+# macOS
+frontend/indecommAttendance/.DS_Store
+
+###machine learning
+backend/ml/image/*/*
+
+backend/ml/model/*
+
+backend/ml/video/*
+
+###server ignore
+backend/server/node_modules
+backend/server/verification
+backend/server/registration
+backend/server/ml/*
+backend/server/.env
