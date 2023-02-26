@@ -19,6 +19,7 @@ app.use(cors(corsOption))
 app.post('/register', regUpload.single('register'), (req, res) =>{
     //python script to complete the registration
     let filename = req.filename
+    console.log(req.body, filename)
 })
 
 app.post('/verify', verUpload.single('verify'), (req, res) =>{
