@@ -15,11 +15,11 @@ frontend/indecommAttendance/web-build/
 frontend/indecommAttendance/.DS_Store
 
 ###machine learning
-backend/ml/image/*
+backend/ml/image
 
-backend/ml/model/*
+backend/ml/model
 
-backend/ml/Video/*
+backend/ml/Video
 
 ###server ignore
 backend/server/node_modules
