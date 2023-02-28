@@ -1,14 +1,11 @@
 const app = require('express')();
 const server = require('http').createServer(app);
 const cors = require('cors')
-const {spawn} = require('child_process')
-const fs = require('fs');
-const os = require('os')
 require('dotenv').config()
 
 
 const { regUpload, verUpload } = require("./config/multer.config")
-const { detectFace } =  require('./services/ml.service')
+const { trainFace } =  require('./services/ml.service')
 
 const corsOption = {
     origin: "*",
@@ -18,11 +15,10 @@ const corsOption = {
 
 app.use(cors(corsOption))
 
+//python script to complete the registration
 app.post('/register', regUpload.single('register'), async (req, res) =>{
-    //python script to complete the registration
     let filename = req.filename
-    let result = detectFace(filename)
-    
+    let result = trainFace(filename)
     res.statusCode = result['code']
     res.json({text: result['text']})
 })
