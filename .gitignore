@@ -25,5 +25,6 @@ backend/ml/Video
 backend/server/node_modules
 backend/server/verification
 backend/server/registration
-backend/server/ml/*
+backend/server/ml/image
+backend/server/ml/model
 backend/server/.env
