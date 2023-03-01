@@ -1,8 +1,10 @@
-import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { Button, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import { Camera } from 'expo-camera'
 import { Video } from 'expo-av';
-import Ionicons from '@expo/vector-icons/Ionicons'
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Modal from 'react-native-modal';
+import { FAB } from 'react-native-elements';
 
 const RegisterCameraScreen = ({ navigation }) => {
 
@@ -10,9 +12,16 @@ const RegisterCameraScreen = ({ navigation }) => {
     const [hasCameraPermission, setHasCameraPermission] = useState(null);
     const [camera, setCamera] = useState(null);
     const [record, setRecord] = useState(null);
-    const [type, setType] = useState(Camera.Constants.Type.back);
+    const [type, setType] = useState(Camera.Constants.Type.front);
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
+    const [isModalVisible, setModalVisible] = useState(true);
+    const [name, setName] = useState("");
+    const [eid, seteid] = useState("")
+    const [uData, setUData] = useState({})
+
+    const nameRef = useRef(null)
+    const inputRef = useRef(null)
 
     useEffect(() => {
         (async () => {
@@ -32,6 +41,10 @@ const RegisterCameraScreen = ({ navigation }) => {
             });
         }
     }, [record, navigation]);
+
+    useEffect(() => {
+        console.log(uData);
+    }, [uData])
 
     const takeVideo = async () => {
         if (camera) {
@@ -54,6 +67,29 @@ const RegisterCameraScreen = ({ navigation }) => {
         return <Text>No access to camera</Text>;
     }
 
+    const toggleModal = () => {
+        if (name !== "" && eid !== "") {
+            console.log(name);
+            console.log(eid);
+            let data = {
+                uname: name,
+                ueid: eid,
+            }
+            setUData(data)
+            setModalVisible(!isModalVisible);
+            console.log(uData)
+        } else {
+            alert('Please enter your username and employee id')
+            if (name == "") {
+                nameRef.current.focus();
+            } else if (eid == "") {
+                inputRef.current.focus();
+            } else {
+                nameRef.current.focus();
+            }
+        }
+    };
+
 
     return (
         <View style={{ flex: 1, alignItems: "center" }}>
@@ -64,25 +100,21 @@ const RegisterCameraScreen = ({ navigation }) => {
                     type={type}
                     ratio={'4:3'} />
             </View>
-            {/* <Video
-                ref={video}
-                style={styles.video}
-                source={{
-                    uri: record,
-                }}
-                useNativeControls
-                resizeMode="contain"
-                isLooping
-                onPlaybackStatusUpdate={status => setStatus(() => status)}
-            /> */}
-            {/* <View style={styles.buttons}>
-                <Button
-                    title={status.isPlaying ? 'Pause' : 'Play'}
-                    onPress={() =>
-                        status.isPlaying ? video.current.pauseAsync() : video.current.playAsync()
-                    }
-                />
-            </View> */}
+
+            <Modal style={{ height: "50%", width: "90%", }} isVisible={isModalVisible}>
+                <KeyboardAvoidingView style={styles.modalContainer}>
+                    <FAB color='white' icon={{ name: 'close', color: '#1E254D' }} placement="right" style={{ top: -350, zIndex: 99 }} onPress={() => { navigation.replace('Home') }} />
+                    <View style={styles.mainHolder}>
+                        {/* <Text style={{ backgroundColor: "white" }}>Hello!</Text> */}
+                        <TextInput autoFocus placeholder='Enter your name' placeholderTextColor="white" style={styles.formInput} onChangeText={(value) => { setName(value) }} ref={nameRef} onSubmitEditing={() => { inputRef.current.focus() }} />
+                        <TextInput placeholder='Enter your employee id' placeholderTextColor="white" style={styles.formInput} ref={inputRef} onChangeText={(value) => { seteid(value) }} onSubmitEditing={() => { toggleModal() }} />
+                        <TouchableOpacity style={{ backgroundColor: "white", width: "100%", height: "20%", justifyContent: "center", borderRadius: 15 }} onPress={() => toggleModal()} >
+                            <Text style={{ textAlign: "center", color: "#1E254D" }}>Hello</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                </KeyboardAvoidingView>
+            </Modal>
 
             <View style={styles.btnContainer}>
                 <TouchableOpacity
@@ -119,13 +151,10 @@ export default RegisterCameraScreen;
 
 const styles = StyleSheet.create({
     cameraContainer: {
-        // flex: 1,
-        // borderWidth: 2,
         flexDirection: 'row',
         height: "100%"
     },
     fixedRatio: {
-        // flex: 1,
         aspectRatio: 1
     },
     video: {
@@ -140,8 +169,6 @@ const styles = StyleSheet.create({
     },
 
     btnContainer: {
-        // borderWidth: 2,
-        // borderColor: "red",
         position: "absolute",
         bottom: 20,
         width: "80%",
@@ -152,21 +179,37 @@ const styles = StyleSheet.create({
 
     },
     btn1: {
-        // backgroundColor: "#1E254D",
-        // height: "40%"
-        // borderWidth: 2,
-        // borderColor: "white",
         width: "60%"
-        // flex: 1
-    },
-    btn: {
-        // backgroundColor: "#1E254D",
-        // height: "40%"
-        // borderWidth: 2,
-        // borderColor: "white",
-        // flex: 1
     },
     btnText: {
         color: "white"
+    },
+
+    modalContainer: {
+        // flex: 1,
+        height: "90%",
+        // borderWidth: 2,
+        // borderColor: "white",
+        top: 0,
+        justifyContent: "center",
+    },
+
+    mainHolder: {
+        borderWidth: 2,
+        borderColor: "#1E254D",
+        padding: "3%",
+        height: "50%",
+        justifyContent: "space-around",
+        borderRadius: 10,
+        backgroundColor: "#1E254D"
+    },
+    formInput: {
+        // borderWidth: 2,
+        // borderColor: "yellow",
+        height: "15%",
+        borderRadius: 15,
+        backgroundColor: "gray",
+        color: "white",
+        paddingHorizontal: 10
     }
 })
