@@ -7,6 +7,7 @@ require('dotenv').config()
 
 const { regUpload, verUpload } = require("./config/multer.config")
 const { trainFace } =  require('./services/ml.service')
+const { insidePrimeter } = require('./services/mapDistance.service').default
 
 require('./config/mongodb.config')()
 const User = require('./Models/user');
@@ -27,30 +28,30 @@ app.post('/register', regUpload.single('register'), async (req, res) =>{
         const user = await User.create({name, employeeID, latitude, longitude}).catch(error=>{ throw error });
         let result = trainFace(filename, user._id)
         if(result.code == 200)
-            res.status(201).json(result.text)
+            res.status(201).json({message: result.text})
         else{
             await User.findByIdAndRemove(user._id);
             throw new Error(result.text)
         }
     }
     catch(error){
-        res.status(400).json({reason: error.message});
+        res.status(400).json({message: error.message});
     }
 })
 
 app.post('/login', verUpload.single('verify'), async (req, res) =>{
     //verfiy the user
     // let filename = req.filename
-    let { employeeID } = req.body;
+    let { employeeID, latitude, longitude } = req.body;
     const user = await this.findOne({employeeID});
     try {
         if(user){
             //code to match the location perimeter
             //if inside locatin, then put attendance, else throw an error
-            if(true){
+            if(insidePrimeter(user.latitude, user.longitude, latitude, longitude)){
                 let uid = uuid.v4()
                 await Attendance.create({employeeID, loginTime: new Date().toString(), uid}).catch(err=> {throw err})
-                res.status(200).json('Login successful')
+                res.status(200).json({message: 'Login successful', uid})
             }
             else{
                 throw Error('You are not allowed to login outside the orgainzation location.')
@@ -59,7 +60,16 @@ app.post('/login', verUpload.single('verify'), async (req, res) =>{
             throw Error("User doesn't exists. Register before logging in")
         }
     } catch (error) {
-        res.status(400).json({reason: error.message})
+        res.status(400).json({message: error.message})
+    }
+})
+
+app.get('/attendance', async (req, res) =>{
+    const { employeeID, uid } = req.body
+    try{
+        const attendance = await Attendance.findOne({employeeID, uid}).catch(err=>{throw err})
+    } catch(err){
+        
     }
 })
 
@@ -67,15 +77,18 @@ app.get('/logout', async (req, res) => {
     //check if user with id exists
     const { employeeID, uid } = req.body
     try {
-        const user = await Attendance.findOne({employeeID, uid}).catch(err=>{throw err})
-        if(user){
-
+        const attendance = await Attendance.findOne({employeeID, uid}).catch(err=>{throw err})
+        if(attendance && !attendance.logoutTime){
+            await Attendance.updateOne({_id: attendance._id}, {logoutTime: new Date().toString()}).catch(err =>{
+                throw Error(err)
+            })
+            res.status(200).json({message: "Successfully loged out"})
         }
         else{
-
+            throw Error()
         }
     } catch (error) {
-        res.status(400).json({reason: "user not authorized"})
+        res.status(400).json({message: "User not authorized"})
     }
 })
 
