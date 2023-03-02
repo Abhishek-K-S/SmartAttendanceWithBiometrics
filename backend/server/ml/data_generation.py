@@ -78,12 +78,11 @@ def data_generation(name, video_path):
 # folder_path = '/home/dharithri/indecommSmartAttendance/backend/ml/Video/'
 # watch_folder(folder_path)
 
-def start_app(file_name):
+def start_app(file_name, id):
     full_path = os.path.join(curr_path, "registration", file_name)
-    name = os.path.splitext(os.path.basename(file_name))[0]
-    data_generation(name, full_path)
+    data_generation(id, full_path)
 
 
 curr_path = os.path.abspath(os.getcwd())
-start_app(sys.argv[1])
+start_app(sys.argv[1], sys.argv[2])
 # print(sys.argv[1], curr_path);

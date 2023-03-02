@@ -7,7 +7,7 @@ import sys
 curr_path = os.path.abspath(os.getcwd())
 data_path = os.path.join(curr_path, 'ml/image')
 model_path = os.path.join(curr_path, 'ml/model')
-person_name = os.path.splitext(os.path.basename(sys.argv[1]))[0]
+person_name = sys.argv[1]
 
 # Create the model folder if it doesn't exist
 if not os.path.exists(model_path):

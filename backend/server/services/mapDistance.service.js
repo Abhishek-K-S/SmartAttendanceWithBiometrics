@@ -26,4 +26,4 @@ function insidePrimeter(lat1, lon1, lat2, lon2){
     return false;
 }
 
-export default {insidePrimeter}
+module.exports = {insidePrimeter}
