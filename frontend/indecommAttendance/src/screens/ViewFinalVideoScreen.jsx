@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Video } from 'expo-av';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -10,18 +10,29 @@ import { FAB } from 'react-native-elements';
 
 const ViewFinalVideoScreen = ({ route, navigation }) => {
     const video = React.useRef(null);
-    const { uri } = route.params;
+    const { uri, euData } = route.params;
 
     const [bottomSheetIndex, setbottomSheetIndex] = useState(0)
-
+    const [userData, setUserData] = useState({})
+    const [finalLocation, setFinalLocation] = useState({})
+    const [loading, setLoading] = useState(false)
 
     const snapPoints = useMemo(() => ["10%", "60%", "100%"], []);
+
+
+    useEffect(() => {
+        setUserData({
+            euData,
+            uri,
+            finalLocation
+        })
+    }, [euData, uri, finalLocation])
 
     const handleSheetChange = useCallback(
         (index) => {
             if (index === 0) {
                 setbottomSheetIndex(0)
-                console.log("done");
+                // console.log("done");
             } else if (index !== 0 && bottomSheetIndex === 0) {
                 setbottomSheetIndex(index)
             }
@@ -30,13 +41,34 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
         [snapPoints, navigation]
     );
 
+    const pull_loc = (lat, long) => {
+        // console.log(lat + " ");
+        // console.log(long);
+        setFinalLocation({
+            latitude: lat,
+            longitude: long,
+        })
+
+    }
+
+    const sendData = () => {
+        if (userData == {}) {
+            setLoading(true);
+            console.log(userData);
+        }
+        else {
+            console.log(userData);
+            setLoading(false)
+        }
+    }
+
     return (
-
-
         <SafeAreaProvider >
             <SafeAreaView style={{ flex: 1, backgroundColor: "#1E254D" }}>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     {/* <Text>{uri}</Text> */}
+
+                    <ActivityIndicator size={50} style={{ position: 'absolute', top: '40%', left: "40%", zIndex: 999 }} color='black' animating={loading} />
 
 
                     <View style={styles.videoTitleContainer}>
@@ -61,26 +93,19 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
                             <Text style={{ color: "black", fontSize: 18 }}>Confirm Location</Text>
                         </View>
                     </TouchableOpacity>
-                    {/* <View style={styles.locationCompWidth}>
-                        <LocationAcessComponent />
-                    </View> */}
                     <View style={styles.videoControlBtns}>
                         {/* <Text>Hello</Text> */}
-                        <TouchableOpacity style={styles.conditionBtn}>
+                        <TouchableOpacity style={styles.conditionBtn} onPress={() => { sendData() }}>
                             <Ionicons name='checkmark-circle' color="green" size={25} />
                             <Text style={{ color: "black" }}>Proceed</Text>
                         </TouchableOpacity>
 
-                        {/* <TouchableOpacity style={styles.retakeBtn} >
-                    <Ionicons name='refresh-circle' size={25} color="white" />
-                    <Text style={{ color: "white" }}>Retake</Text>
-                </TouchableOpacity> */}
-
-                        <TouchableOpacity style={styles.conditionBtn} >
+                        <TouchableOpacity style={styles.conditionBtn} onPress={() => { navigation.popToTop(); navigation.replace('Home') }} >
                             <Ionicons name='exit' size={25} color="red" />
                             <Text style={{ color: "black" }}>Exit</Text>
                         </TouchableOpacity>
                     </View>
+
 
 
                     <BottomSheet
@@ -91,13 +116,13 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
                         onChange={handleSheetChange}
                     // backdropComponent={customBackdrop}
                     >
-                        <LocationAcessComponent />
+                        <LocationAcessComponent pull_loc={pull_loc} />
                         <FAB icon={{ name: 'close', color: "white" }} color='#1E254D' size={25} placement='right' style={{ top: '-80%' }} onPress={() => { setbottomSheetIndex(0) }} />
                     </BottomSheet>
 
                 </GestureHandlerRootView>
             </SafeAreaView>
-        </SafeAreaProvider>
+        </SafeAreaProvider >
     )
 }
 
