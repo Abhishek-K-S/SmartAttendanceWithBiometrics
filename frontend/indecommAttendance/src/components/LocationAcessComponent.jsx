@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import MapView, { Marker } from 'react-native-maps'
 import * as Location from 'expo-location'
 
-const LocationAcessComponent = () => {
+const LocationAcessComponent = ({ pull_loc }) => {
     // Device location specific code
     const [location, setLocation] = useState(null)
     const [errorMsg, setErrorMsg] = useState(null)
@@ -22,6 +22,13 @@ const LocationAcessComponent = () => {
         })()
     }, [])
 
+    useEffect(() => {
+        if (userLoc != null) {
+
+            pull_loc(userLoc.coords.latitude, userLoc.coords.longitude)
+        }
+    }, [location])
+
     let loc
     if (errorMsg) {
         loc = errorMsg
@@ -34,7 +41,7 @@ const LocationAcessComponent = () => {
         userLoc = JSON.parse(loc)
     }
 
-    console.log(userLoc)
+    // console.log(userLoc)
 
     const onMapLayout = () => {
         setIsMapReady(true)

@@ -34,17 +34,16 @@ const RegisterCameraScreen = ({ navigation }) => {
     }, []);
 
     useEffect(() => {
-        if (record) {
+        if (record && uData) {
             navigation.popToTop();
             navigation.navigate('ViewScreen', {
                 uri: record,
+                euData: uData,
             });
         }
-    }, [record, navigation]);
+    }, [record, navigation, uData]);
 
-    useEffect(() => {
-        console.log(uData);
-    }, [uData])
+
 
     const takeVideo = async () => {
         if (camera) {
@@ -52,7 +51,7 @@ const RegisterCameraScreen = ({ navigation }) => {
                 maxDuration: 2,
             });
             setRecord(data.uri);
-            console.log(data.uri);
+            // console.log(data.uri);
         }
     };
 
@@ -69,15 +68,15 @@ const RegisterCameraScreen = ({ navigation }) => {
 
     const toggleModal = () => {
         if (name !== "" && eid !== "") {
-            console.log(name);
-            console.log(eid);
+            // console.log(name);
+            // console.log(eid);
             let data = {
                 uname: name,
                 ueid: eid,
             }
             setUData(data)
             setModalVisible(!isModalVisible);
-            console.log(uData)
+            // console.log(uData)
         } else {
             alert('Please enter your username and employee id')
             if (name == "") {
@@ -105,11 +104,10 @@ const RegisterCameraScreen = ({ navigation }) => {
                 <KeyboardAvoidingView style={styles.modalContainer}>
                     <FAB color='white' icon={{ name: 'close', color: '#1E254D' }} placement="right" style={{ top: -350, zIndex: 99 }} onPress={() => { navigation.replace('Home') }} />
                     <View style={styles.mainHolder}>
-                        {/* <Text style={{ backgroundColor: "white" }}>Hello!</Text> */}
                         <TextInput autoFocus placeholder='Enter your name' placeholderTextColor="white" style={styles.formInput} onChangeText={(value) => { setName(value) }} ref={nameRef} onSubmitEditing={() => { inputRef.current.focus() }} />
                         <TextInput placeholder='Enter your employee id' placeholderTextColor="white" style={styles.formInput} ref={inputRef} onChangeText={(value) => { seteid(value) }} onSubmitEditing={() => { toggleModal() }} />
                         <TouchableOpacity style={{ backgroundColor: "white", width: "100%", height: "20%", justifyContent: "center", borderRadius: 15 }} onPress={() => toggleModal()} >
-                            <Text style={{ textAlign: "center", color: "#1E254D" }}>Hello</Text>
+                            <Text style={{ textAlign: "center", color: "#1E254D" }}>Continue</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -125,14 +123,13 @@ const RegisterCameraScreen = ({ navigation }) => {
                                 : Camera.Constants.Type.back
                         );
                     }}
-                    // style={{ borderWidth: 2, backgroundColor: "#1E254D" }}
+
                     style={styles.btn}
                 >
-                    {/* <Text style={styles.btnText}>Flip Video</Text> */}
                     <Ionicons name='camera-reverse' size={50} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.btn1} onPress={() => takeVideo()} >
-                    {/* <Text style={styles.btnText}>Take Video</Text> */}
+
                     <Ionicons name='play-circle' size={70} color="white" />
                 </TouchableOpacity>
 
