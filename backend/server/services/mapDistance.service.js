@@ -1,5 +1,6 @@
-const circleRadius = 200 //in meters
+const circleRadius = 100 //in meters
 
+//get distance between 2 coordinate locations, aerial distance
 function getDist(lat1, lon1, lat2, lon2) 
 {
     var R = 6371; // km
@@ -14,11 +15,13 @@ function getDist(lat1, lon1, lat2, lon2)
     return R * c;
 }
 
+//degree to radian
 function toRad(value) 
 {
     return value * Math.PI / 180;
 }
 
+//check if inside the perimeter or not, send boolean values
 function insidePrimeter(lat1, lon1, lat2, lon2){
     let dist = getDist(lat1, lon1, lat2, lon2);
     if(dist <= circleRadius)
