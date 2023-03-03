@@ -25,11 +25,23 @@ app.use(cors(corsOption))
 
 //register the user and train a model from the given video
 app.post('/register', regUpload.single('register'), async (req, res) =>{
-    const {name, employeeID, latitude, longitude} = req.body
     let filename = req.filename
     try{
+        // console.log(req.body)
+        if(!req.body.employeeID || !req.body.name || !req.body.longitude || !req.body.latitude){
+            throw Error('Action not authorized')
+        }
+        const {name, employeeID, latitude, longitude} = req.body
+        console.log(name, typeof(name))
+        console.log(employeeID, typeof(employeeID))
+        console.log(latitude, typeof(latitude))
+        console.log(longitude, typeof(longitude))
+        if(isNaN(latitude) || isNaN(longitude)){
+            throw Error('Invalid location')
+        }
+        
         //create a new user in the db, we do create the entry first as we need id for the processing of video sent by the user
-        const user = await User.create({name, employeeID, latitude, longitude}).catch(error=>{ throw error });
+        const user = await User.create({name, employeeID, latitude:Number(latitude),longitude: Number(longitude)}).catch(error=>{ throw error });
         let result = trainFace(filename, user._id)
         if(result.code == 200){
             //model is created
@@ -52,9 +64,12 @@ app.post('/register', regUpload.single('register'), async (req, res) =>{
 
 app.post('/login', verUpload.single('verify'), async (req, res) =>{
     //verfiy the user
-    let { employeeID, latitude, longitude } = req.body;
-    const filename = req['filename']
     try {
+        if(!req.body.employeeID || !req.body.latitude || !req.body.longitude){
+            throw Error('User not authorized')
+        }
+        const { employeeID, latitude, longitude } = req.body;
+        const filename = req['filename']
         //check if user already logged in using employee id
         const user = await this.findOne({employeeID});
         if(user){
@@ -89,9 +104,13 @@ app.post('/login', verUpload.single('verify'), async (req, res) =>{
 })
 
 //get the list of user attendance
-app.get('/attendance', async (req, res) =>{
-    const { employeeID, uid } = req.body
+app.post('/attendance', async (req, res) =>{
+    
     try{
+        if(!req.body.employeeID || ! req.body.uid){
+            throw Error()
+        }
+        const { employeeID, uid } = req.body
         //get current user, if logged in but not logged out
         const attendance = await Attendance.findOne({employeeID, uid}).catch(err=>{throw err})
         if(attendance && !attendance.logoutTime ){
@@ -111,8 +130,12 @@ app.get('/attendance', async (req, res) =>{
 
 app.get('/logout', async (req, res) => {
     //check if user with id exists
-    const { employeeID, uid } = req.body
     try {
+        if(!req.body.employeeID || ! req.body.uid){
+            throw Error()
+        }
+        const { employeeID, uid } = req.body
+        
         //check if user is logged in and not logged out yet
         const attendance = await Attendance.findOne({employeeID, uid}).catch(err=>{throw err})
         if(attendance && !attendance.logoutTime){
