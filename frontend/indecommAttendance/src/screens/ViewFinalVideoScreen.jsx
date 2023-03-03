@@ -7,6 +7,7 @@ import LocationAcessComponent from '../components/LocationAcessComponent';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { FAB } from 'react-native-elements';
+import { router_post } from '../../services/server.service'
 
 const ViewFinalVideoScreen = ({ route, navigation }) => {
     const video = React.useRef(null);
@@ -57,7 +58,19 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
             console.log(userData);
         }
         else {
-            console.log(userData);
+            let formdata = new FormData();
+            formdata.append('register', {
+                uri: userData.uri,
+                type: "video/mp4",
+                name: userData.euData.ueid+'.mp4'
+            });
+            console.log(userData.uri)
+            formdata.append('name', userData.euData.uname);
+            formdata.append('employeeID', userData.euData.ueid)
+            formdata.append('latitude', userData.finalLocation.latitude)
+            formdata.append('longitude', userData.finalLocation.longitude)
+            // console.log(formdata)
+            router_post('/register', formdata, true).then(res =>console.log("response is", res.data)).catch(err =>{console.error(err.response)});
             setLoading(false)
         }
     }
