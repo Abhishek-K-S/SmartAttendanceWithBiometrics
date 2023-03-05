@@ -7,7 +7,7 @@ import LocationAcessComponent from '../components/LocationAcessComponent';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { FAB } from 'react-native-elements';
-import { router_post } from '../../services/server.service'
+import { router_post } from '../../services/server.service.js'
 
 const ViewFinalVideoScreen = ({ route, navigation }) => {
     const video = React.useRef(null);
