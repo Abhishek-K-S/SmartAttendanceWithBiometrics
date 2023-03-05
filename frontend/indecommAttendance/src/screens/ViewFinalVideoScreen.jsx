@@ -62,7 +62,7 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
             formdata.append('register', {
                 uri: userData.uri,
                 type: "video/mp4",
-                name: userData.euData.ueid+'.mp4'
+                name: userData.euData.ueid + '.mp4'
             });
             console.log(userData.uri)
             formdata.append('name', userData.euData.uname);
@@ -70,8 +70,12 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
             formdata.append('latitude', userData.finalLocation.latitude)
             formdata.append('longitude', userData.finalLocation.longitude)
             // console.log(formdata)
-            router_post('/register', formdata, true).then(res =>console.log("response is", res.data)).catch(err =>{console.error(err.response)});
+            router_post('/register', formdata, true).then(res => console.log("response is", res.data)).catch(err => { console.error(err.response) });
             setLoading(false)
+
+            //emptied the stack and made sure user cannot exit mainScreen and go back to homScreen. Need to change it later on
+            navigation.popToTop();
+            navigation.replace('MainScreen')
         }
     }
 
