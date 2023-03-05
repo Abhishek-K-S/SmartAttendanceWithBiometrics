@@ -3,8 +3,8 @@ import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import HeaderMain from '../components/MainScreen/HeaderMain'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import Calendar from '../MainScreenTabs/Calendar'
 import CharTab from '../MainScreenTabs/CharTab'
+import CalendarTab from '../MainScreenTabs/CalendarTab'
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -26,7 +26,7 @@ const MainScreen = () => {
             <View style={styles.bottomContainer}>
                 <Tab.Navigator screenOptions={{ tabBarStyle: { backgroundColor: "#1C2351" }, tabBarLabelStyle: { color: "white" }, tabBarIndicatorStyle: { backgroundColor: "#25A7DB", height: '12%', borderRadius: 9 }, }}>
                     <Tab.Screen name='Chart' component={CharTab} />
-                    <Tab.Screen name='Calendar' component={Calendar} />
+                    <Tab.Screen name='Calendar' component={CalendarTab} />
                 </Tab.Navigator>
 
             </View>
