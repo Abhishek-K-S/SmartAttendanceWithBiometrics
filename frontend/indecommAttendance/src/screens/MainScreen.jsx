@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import HeaderMain from '../components/MainScreen/HeaderMain'
@@ -18,6 +18,10 @@ const MainScreen = () => {
             <View style={styles.topContainer}>
                 <Text style={styles.welcomeText}>Welcome Ashay!</Text>
                 <Text style={styles.presenceText}>Your presence has been successfully recorded</Text>
+                <View style={{ justifyContent: "center", alignItems: 'center', marginTop: "5%", height: '22%' }}>
+
+                    <TouchableOpacity style={styles.logOutBtn}><Text style={styles.logOutBtnText}>Log out</Text></TouchableOpacity>
+                </View>
             </View>
             <View style={styles.bottomContainer}>
                 <Tab.Navigator screenOptions={{ tabBarStyle: { backgroundColor: "#1C2351" }, tabBarLabelStyle: { color: "white" }, tabBarIndicatorStyle: { backgroundColor: "#25A7DB", height: '12%', borderRadius: 9 }, }}>
@@ -71,4 +75,17 @@ const styles = StyleSheet.create({
 
         elevation: 24,
     },
+    logOutBtn: {
+        width: "50%",
+        height: "100%",
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 30,
+        backgroundColor: '#1C2351',
+    },
+    logOutBtnText: {
+        color: "white",
+        fontSize: 18,
+        elevation: 22
+    }
 })
