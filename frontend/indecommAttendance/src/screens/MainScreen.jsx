@@ -3,8 +3,8 @@ import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import HeaderMain from '../components/MainScreen/HeaderMain'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import CharTab from '../MainScreenTabs/CharTab'
 import Calendar from '../MainScreenTabs/Calendar'
+import CharTab from '../MainScreenTabs/CharTab'
 
 const Tab = createMaterialTopTabNavigator();
 
