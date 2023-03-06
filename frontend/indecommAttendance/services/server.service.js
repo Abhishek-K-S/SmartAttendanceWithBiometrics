@@ -35,7 +35,7 @@ export const router_post = async (route, body, multipart) =>{
     let headers = {
         Accept: 'application/json',
         'Content-Type': 'multipart/form-data'
-      }
+    }
 
     console.log(host+route);
     return axios.post(host+route, body, { headers: multipart ? headers: {}}).then(res =>{

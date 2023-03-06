@@ -5,6 +5,9 @@ import { Video } from 'expo-av';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import { FAB } from 'react-native-elements';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LocationAcessComponent from '../components/LocationAcessComponent';
+import { router_post } from '../../services/server.service';
 
 const LoginScreen = ({ navigation }) => {
 
@@ -16,9 +19,10 @@ const LoginScreen = ({ navigation }) => {
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
     const [isModalVisible, setModalVisible] = useState(true);
-    const [name, setName] = useState("");
+    // const [name, setName] = useState("");
     const [eid, seteid] = useState("")
     const [uData, setUData] = useState({})
+    const [finalLocation, setFinalLocation] = useState({})
 
     const nameRef = useRef(null)
     const inputRef = useRef(null)
@@ -30,22 +34,52 @@ const LoginScreen = ({ navigation }) => {
 
             const audioStatus = await Camera.requestMicrophonePermissionsAsync();
             setHasAudioPermission(audioStatus.status === "granted");
+
+            await AsyncStorage.getItem('employeeID').then(val =>{
+                seteid(val);
+                toggleModal()
+            }).catch(err => console.log("uid isn't present in the storage, getting it manually"))
         })();
+
     }, []);
 
 
     //Possible changes for async storage must be added to save user state.
     useEffect(() => {
-        if (record && uData) {
+        if (record && uData && finalLocation.latitude) {
             navigation.popToTop();
 
-            //change it to .replace if no back flow option needed **
-            navigation.navigate('MainScreen', {
+            let formdata = new FormData();
+            formdata.append('register', {
                 uri: record,
-                euData: uData,
+                type: "video/mp4",
+                name: uData.ueid + '.mp4'
             });
+            console.log(uData.eid)
+            formdata.append('employeeID', uData.ueid)
+            formdata.append('latitude', finalLocation.latitude)
+            formdata.append('longitude', finalLocation.longitude)
+            // console.log(formdata)
+            router_post('/login', formdata, true).then(res =>{
+                console.log("response is", res.data)
+                navigation.navigate('MainScreen');
+            })
+            .catch(err => { console.error(err.response) });
+
+            //change it to .replace if no back flow option needed **
+            
         }
-    }, [record, navigation, uData]);
+    }, [record, navigation, uData, finalLocation]);
+
+    const pull_loc = (lat, long) => {
+        // console.log(lat + " ");
+        // console.log(long);
+        setFinalLocation({
+            latitude: lat,
+            longitude: long,
+        })
+
+    }
 
 
 
@@ -71,25 +105,18 @@ const LoginScreen = ({ navigation }) => {
     }
 
     const toggleModal = () => {
-        if (name !== "" && eid !== "") {
+        if (eid !== "") {
             // console.log(name);
             // console.log(eid);
             let data = {
-                uname: name,
                 ueid: eid,
             }
             setUData(data)
             setModalVisible(!isModalVisible);
             // console.log(uData)
         } else {
-            alert('Please enter your username and employee id')
-            if (name == "") {
-                nameRef.current.focus();
-            } else if (eid == "") {
-                inputRef.current.focus();
-            } else {
-                nameRef.current.focus();
-            }
+            alert('employee id')
+            inputRef.current.focus();
         }
     };
 
@@ -107,7 +134,6 @@ const LoginScreen = ({ navigation }) => {
                 <KeyboardAvoidingView style={styles.modalContainer}>
                     <FAB color='white' icon={{ name: 'close', color: '#1E254D' }} placement="right" style={{ top: -350, zIndex: 99 }} onPress={() => { navigation.replace('Home') }} />
                     <View style={styles.mainHolder}>
-                        <TextInput autoFocus placeholder='Enter your name' placeholderTextColor="white" style={styles.formInput} onChangeText={(value) => { setName(value) }} ref={nameRef} onSubmitEditing={() => { inputRef.current.focus() }} />
                         <TextInput placeholder='Enter your employee id' placeholderTextColor="white" style={styles.formInput} ref={inputRef} onChangeText={(value) => { seteid(value) }} onSubmitEditing={() => { toggleModal() }} />
                         <TouchableOpacity style={{ backgroundColor: "white", width: "100%", height: "20%", justifyContent: "center", borderRadius: 15 }} onPress={() => toggleModal()} >
                             <Text style={{ textAlign: "center", color: "#1E254D" }}>Continue</Text>
@@ -141,7 +167,7 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.btnText}>Stop Video</Text>
                 </TouchableOpacity> */}
             </View>
-
+            {/* <LocationAcessComponent pull_loc={pull_loc} /> */}
 
         </View>
     )
