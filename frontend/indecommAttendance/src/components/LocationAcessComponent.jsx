@@ -97,11 +97,14 @@ export default LocationAcessComponent
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 1,
         // backgroundColor: "#1E254D"
     },
     map: {
         width: '100%',
-        height: '90%',
+        // height: '90%',
+        // height: 500,
+        height: 700,
+        // maxHeight: '90%'
     },
 })
