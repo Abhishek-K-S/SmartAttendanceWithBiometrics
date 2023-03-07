@@ -1,11 +1,103 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, Agenda } from 'react-native-calendars';
+import { router_post } from '../../services/server.service';
 
 
 // https://github.com/wix/react-native-calendars#readme
 
 const CalendarTab = () => {
+    const [attendanceList, setAttendanceList] = useState({});
+    const [attendanceArr, setAttendanceArr] = useState([]);
+    const [accCreatedOn, setAccCreatedOn] = useState(new Date().toISOString())
+
+    useEffect(()=>{
+        (()=>{
+            router_post('/attendance', {}).then(res =>{
+                // console.log(res.data.attendanceList); 
+                // setAttendanceList(res.data.attendanceList)
+                // setAttendanceArr(res.data.attendanceList)
+                let arr = []
+                let list = {}
+                for(let attendance of res.data.attendanceList){
+                    let key = formatDate(attendance['login'])
+                    if(!list[key]){
+                        list[key] = markCalender
+                    }
+                    arr.push({
+                        login: key, 
+                        logout: formatDate(attendance['logout']), 
+                        loginTime: getTime(attendance['login']), 
+                        logoutTime: getTime(attendance['logout']) 
+                    })
+                }
+                setAttendanceArr(arr)
+                setAttendanceList(list)
+                if(res.data.accountCreatedOn){
+                    setAccCreatedOn(res.data.accountCreatedOn)
+                }
+            })
+        })()
+    }, [])
+
+    function getTime(dateString){
+        const date = new Date(dateString);
+        return date.getHours() + ":" + date.getMinutes()
+    }
+
+    function formatDate(dateString){
+        const date = new Date(dateString)
+        return date.getFullYear()+'-'+appendZero(date.getMonth()+1)+"-"+appendZero(date.getDate())
+    }
+
+    function appendZero(num){
+        return num<10 ?  "0"+num: String(num);
+    }
+
+    function showData(date){
+        attendanceArr.forEach(ele=>{
+            if(ele.login === date){
+                console.log(`login: ${ele.login} ${ele.loginTime}, logout: ${ele.logout} ${ele.logoutTime}`)
+            }
+        })
+    }
+
+    function calcAbesense(){
+        //avoid sundays adn saturdays
+        //before this methode, optimaize the array to store multiple data into a single object
+    }
+
+    console.log("att list", attendanceList)
+
+    const markCalender = {
+        color: "#70d7c7",
+        textColor: "white",
+        // marked: true
+    }
+
+    // {
+    //     "2023-05-15": { marked: true, dotColor: "#50cebb" },
+    //     "2023-05-16": { marked: true, dotColor: "#50cebb" },
+    //     "2023-05-21": {
+    //         startingDay: true,
+    //         color: "#50cebb",
+    //         textColor: "white",
+    //     },
+    //     "2023-05-22": { color: "#70d7c7", textColor: "white" },
+    //     "2023-05-23": {
+    //         color: "#70d7c7",
+    //         textColor: "white",
+    //         marked: true,
+    //         dotColor: "white",
+    //     },
+    //     "2023-05-24": { color: "#70d7c7", textColor: "white" },
+    //     "2023-05-25": {
+    //         endingDay: true,
+    //         color: "#50cebb",
+    //         textColor: "white",
+    //     },
+    // }
+
     return (
         <View style={{ backgroundColor: "#1C2351", height: "100%" }}>
             <Text style={{ color: 'white', fontSize: 18, marginVertical: '3%' }} >Calendar</Text>
@@ -17,28 +109,10 @@ const CalendarTab = () => {
                 // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
                 maxDate={"2050-12-30"}
                 markingType={"period"}
-                markedDates={{
-                    "2012-05-15": { marked: true, dotColor: "#50cebb" },
-                    "2012-05-16": { marked: true, dotColor: "#50cebb" },
-                    "2012-05-21": {
-                        startingDay: true,
-                        color: "#50cebb",
-                        textColor: "white",
-                    },
-                    "2012-05-22": { color: "#70d7c7", textColor: "white" },
-                    "2012-05-23": {
-                        color: "#70d7c7",
-                        textColor: "white",
-                        marked: true,
-                        dotColor: "white",
-                    },
-                    "2012-05-24": { color: "#70d7c7", textColor: "white" },
-                    "2012-05-25": {
-                        endingDay: true,
-                        color: "#50cebb",
-                        textColor: "white",
-                    },
+                onDayPress={day => {
+                    showData(day.dateString);
                 }}
+                markedDates={attendanceList}
                 style={{
                     borderWidth: 1,
                     borderColor: "gray",
@@ -46,7 +120,7 @@ const CalendarTab = () => {
                     // backgroundColor: 'blue',
                     borderRadius: 25
                 }}
-            // enableSwipeMonths={true}
+            enableSwipeMonths={true}
 
             />
 

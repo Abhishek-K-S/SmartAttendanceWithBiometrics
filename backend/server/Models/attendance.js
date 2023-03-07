@@ -5,16 +5,16 @@ const attendanceSchema = new mongoose.Schema({
         required: true,
         type: String
     },
-    loginTime: {
-        required: true,
-        type: String
-    },
-    logoutTime: String,
+    // loginTime: {
+    //     required: true,
+    //     type: String
+    // },
+    // logoutTime: String,
     uid: {
         required: true,
         type: String
     }
-})
+},{timestamps: true})
 
 const Attendance = mongoose.model('Attendance', attendanceSchema);
 

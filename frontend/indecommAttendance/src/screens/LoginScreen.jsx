@@ -1,4 +1,4 @@
-import { Button, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Button, KeyboardAvoidingView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { Camera } from 'expo-camera'
 import { Video } from 'expo-av';
@@ -8,11 +8,13 @@ import { FAB } from 'react-native-elements';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LocationAcessComponent from '../components/LocationAcessComponent';
 import { router_post } from '../../services/server.service';
+import * as Location from 'expo-location'
 
 const LoginScreen = ({ navigation }) => {
 
     const [hasAudioPermission, setHasAudioPermission] = useState(null);
     const [hasCameraPermission, setHasCameraPermission] = useState(null);
+    const [hasLocationPermission, setHasLocationPermission] = useState(null)
     const [camera, setCamera] = useState(null);
     const [record, setRecord] = useState(null);
     const [type, setType] = useState(Camera.Constants.Type.front);
@@ -23,8 +25,6 @@ const LoginScreen = ({ navigation }) => {
     const [eid, seteid] = useState("")
     const [uData, setUData] = useState({})
     const [finalLocation, setFinalLocation] = useState({})
-
-    const nameRef = useRef(null)
     const inputRef = useRef(null)
 
     useEffect(() => {
@@ -35,57 +35,61 @@ const LoginScreen = ({ navigation }) => {
             const audioStatus = await Camera.requestMicrophonePermissionsAsync();
             setHasAudioPermission(audioStatus.status === "granted");
 
-            await AsyncStorage.getItem('employeeID').then(val =>{
-                seteid(val);
-                toggleModal()
-            }).catch(err => console.log("uid isn't present in the storage, getting it manually"))
+            const { status } = await Location.requestForegroundPermissionsAsync()
+            setHasLocationPermission(status === "granted")
+
+            await AsyncStorage.getItem('employeeID').then( val =>{
+                console.log("value is " +val, typeof(val))
+                if(val){
+                    console.log("setting value "+ val);
+                    setUData({
+                        ueid: val
+                    })
+
+                    setModalVisible(false);
+                }
+            }).catch(err => console.log("employee isn't present in the storage, getting it manually"))
+
+            let location = await Location.getLastKnownPositionAsync({})
+            console.log(location)
+            if(location){
+                setFinalLocation({
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude
+                })
+            }
         })();
 
     }, []);
+
+    useEffect(()=>{
+        if(hasAudioPermission===false || hasCameraPermission===false || hasLocationPermission===false){
+            ToastAndroid.show('Location, camera and microphone permissions are required', ToastAndroid.LONG)
+            navigation.popToTop();
+            navigation.replace('Home')
+        }
+    },[hasAudioPermission, hasCameraPermission, hasLocationPermission])
 
 
     //Possible changes for async storage must be added to save user state.
     useEffect(() => {
         if (record && uData && finalLocation.latitude) {
+            // navigation.popToTop();
             navigation.popToTop();
-
-            let formdata = new FormData();
-            formdata.append('register', {
-                uri: record,
-                type: "video/mp4",
-                name: uData.ueid + '.mp4'
-            });
-            console.log(uData.eid)
-            formdata.append('employeeID', uData.ueid)
-            formdata.append('latitude', finalLocation.latitude)
-            formdata.append('longitude', finalLocation.longitude)
-            // console.log(formdata)
-            router_post('/login', formdata, true).then(res =>{
-                console.log("response is", res.data)
-                navigation.navigate('MainScreen');
+            navigation.replace('MainScreen',{
+                uData,
+                finalLocation,
+                record, 
+                doLogin: true
             })
-            .catch(err => { console.error(err.response) });
-
             //change it to .replace if no back flow option needed **
             
         }
-    }, [record, navigation, uData, finalLocation]);
-
-    const pull_loc = (lat, long) => {
-        // console.log(lat + " ");
-        // console.log(long);
-        setFinalLocation({
-            latitude: lat,
-            longitude: long,
-        })
-
-    }
-
-
+    }, [record, uData, finalLocation]);
 
     const takeVideo = async () => {
         if (camera) {
-            const data = await camera.recordAsync({
+            let data = await camera.recordAsync({
                 maxDuration: 2,
             });
             setRecord(data.uri);
@@ -103,9 +107,12 @@ const LoginScreen = ({ navigation }) => {
     if (hasCameraPermission === false || hasAudioPermission === false) {
         return <Text>No access to camera</Text>;
     }
+    if(!hasLocationPermission){
+        return <Text>Cannot access location</Text>
+    }
 
     const toggleModal = () => {
-        if (eid !== "") {
+        if (eid && eid.length !== 0) {
             // console.log(name);
             // console.log(eid);
             let data = {
@@ -127,7 +134,8 @@ const LoginScreen = ({ navigation }) => {
                     ref={ref => setCamera(ref)}
                     style={styles.fixedRatio}
                     type={type}
-                    ratio={'4:3'} />
+                    ratio={'4:3'}
+                     />
             </View>
 
             <Modal style={{ height: "50%", width: "90%", }} isVisible={isModalVisible}>
@@ -167,7 +175,6 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.btnText}>Stop Video</Text>
                 </TouchableOpacity> */}
             </View>
-            {/* <LocationAcessComponent pull_loc={pull_loc} /> */}
 
         </View>
     )

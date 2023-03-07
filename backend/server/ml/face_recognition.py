@@ -5,7 +5,8 @@ import sys
 
 model_name = sys.argv[2]+".model"
 trained_file = os.path.join(os.path.abspath(os.getcwd()), "ml", "model", model_name )
-face_recognizer = cv2.face.LBPHFaceRecognizer_create().read(trained_file)
+face_recognizer = cv2.face.LBPHFaceRecognizer_create()
+face_recognizer.read(trained_file)
 
 # Load the face classifier
 cascade_dir = os.path.join(os.path.dirname(cv2.__file__), "data", "haarcascade_frontalface_default.xml")
@@ -13,8 +14,9 @@ face_classifier = cv2.CascadeClassifier(cascade_dir)
 
 def face_detection(img, size=0.5):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    roi = []
     faces = face_classifier.detectMultiScale(gray, 1.3, 5)
-    if faces ==():
+    if len(faces)==0:
         return img,[]
     for(x,y,w,h) in faces:
         cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,0),2)
@@ -27,6 +29,8 @@ cap = cv2.VideoCapture(video_file)
 result_list=[]
 while True:
     ret, frame = cap.read()
+    if not ret:
+        break;
     image, face = face_detection(frame)
     try:
         face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
@@ -50,16 +54,20 @@ while True:
         #     break
     except:
         pass
-    cv2.imshow('Face Recognition', image)
+    # cv2.imshow('Face Recognition', image)
     if cv2.waitKey(1) == 13:
         break
-avg = sum(result_list) / len(result_list)
+
+result_list.sort(reverse=True)
+best_arr = result_list[0: int(len(result_list)/2)]
+avg = (sum(best_arr) / len(best_arr)) if len(result_list) >0 else 0
+print("average arr", avg)
 if avg >= 80:
     print(True)
 else:
     print(False)
 cap.release()
-cv2.destroyAllWindows()
+# cv2.destroyAllWindows()
 
                  
              

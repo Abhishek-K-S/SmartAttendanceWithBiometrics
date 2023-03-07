@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Video } from 'expo-av';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -64,18 +64,22 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
                 type: "video/mp4",
                 name: userData.euData.ueid + '.mp4'
             });
-            console.log(userData.uri)
+            
             formdata.append('name', userData.euData.uname);
             formdata.append('employeeID', userData.euData.ueid)
             formdata.append('latitude', userData.finalLocation.latitude)
             formdata.append('longitude', userData.finalLocation.longitude)
+            
             // console.log(formdata)
-            router_post('/register', formdata, true).then(res => console.log("response is", res.data)).catch(err => { console.error(err.response) });
+            router_post('/register', formdata, true).then(res =>{
+                 console.log("response is", res.data);
+                 ToastAndroid.show('Registered successfully', ToastAndroid.LONG)
+                 navigation.popToTop();
+                 navigation.replace('Home')
+            }).catch(err => { console.error(err.response) });
             setLoading(false)
 
             //emptied the stack and made sure user cannot exit mainScreen and go back to homScreen. Need to change it later on
-            navigation.popToTop();
-            navigation.replace('MainScreen')
         }
     }
 

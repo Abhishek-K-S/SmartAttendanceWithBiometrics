@@ -13,6 +13,7 @@ const trainFace = (filename, id) =>{
 const verifyFace = (filename, id) =>{
     //Run face recognition.
     const result_encoded = runPythonSync(['ml/face_recognition.py', filename, id])
+    console.log(result_encoded.stdout)
     //proceed if only python reutrns proper exit code, which is 0, else code encountered an erorr, so terminate the face recognition
     if(parseInt(result_encoded.status) === 0)
         //True will be printed by  python in case of match to the stdout, else false is printed, which we send to the api
