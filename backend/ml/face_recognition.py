@@ -39,10 +39,8 @@ for subdir in subdirs:
     face_recognizer.read(model_file_path)
     trained_models[person_name] = face_recognizer
 
-
 print('Training completed for all users')
 print(trained_models)
-
 # Load the face classifier
 cascade_dir = os.path.join(os.path.dirname(cv2.__file__), "data", "haarcascade_frontalface_default.xml")
 face_classifier = cv2.CascadeClassifier(cascade_dir)
@@ -57,8 +55,6 @@ def face_detection(img, size=0.5):
         roi = img[y:y+h, x:x+w]
         roi = cv2.resize(roi, (200,200))
     return img,roi
-
-
 cap = cv2.VideoCapture(0)
 while True:
     ret, frame = cap.read()
@@ -73,7 +69,6 @@ while True:
                 #compares the confidence with the threashold value
                     confidence = int(100 * (1 - (result[1]) / 300))
                     result_list.append((person_name, confidence))
-
         #Sort tthe list in descending order 
         result_list.sort(key=lambda x: x[1], reverse=True) 
         print(result_list)
@@ -93,7 +88,6 @@ while True:
     cv2.imshow('Face Recognition', image)
     if cv2.waitKey(1) == 13:
         break
-
 cap.release()
 cv2.destroyAllWindows()
 

@@ -1,9 +1,12 @@
+
 import cv2
 import os
+import time
+import watchdog.events
+import watchdog.observers
 
 cascade_dir = os.path.join(os.path.dirname(cv2.__file__), "data", "haarcascade_frontalface_default.xml")
-
-face_classifier = cv2.CascadeClassifier( cascade_dir)
+face_classifier = cv2.CascadeClassifier(cascade_dir)
 
 def face_extractor(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -17,8 +20,8 @@ def face_extractor(img):
 
     return cropped_face
 
-def data_generation(name):
-    cap = cv2.VideoCapture(0)
+def data_generation(name, video_path):
+    cap = cv2.VideoCapture(video_path)
     count = 0
 
     folder_path = '/home/dharithri/indecommSmartAttendance/backend/ml/image/' + name
@@ -26,6 +29,9 @@ def data_generation(name):
 
     while True:
         ret, frame = cap.read()
+
+        if not ret:
+            break
 
         if face_extractor(frame) is not None:
             count += 1
@@ -47,7 +53,26 @@ def data_generation(name):
     cv2.destroyAllWindows()
     print('Data collection completed for ' + name)
 
-name = input("Enter name of agent: ")
-data_generation(name)
+def watch_folder(folder_path):
+    class NewFileHandler(watchdog.events.PatternMatchingEventHandler):
+        def on_created(self, event):
+            if event.is_directory:
+                return
+            if event.src_path.endswith('.mp4'):
+                name = os.path.splitext(os.path.basename(event.src_path))[0]
+                data_generation(name, event.src_path)
+    
+    observer = watchdog.observers.Observer()
+    event_handler = NewFileHandler(patterns=['*.mp4'])
+    observer.schedule(event_handler, folder_path, recursive=False)
+    observer.start()
 
+    try:
+        while True:
+            time.sleep(5)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
+folder_path = '/home/dharithri/indecommSmartAttendance/backend/ml/Video/'
+watch_folder(folder_path)
