@@ -5,9 +5,8 @@ import tensorflow as tf
 from tensorflow import keras
 
 # Define the paths to the face dataset and output model
-FACE_DATASET_PATH = "/home/dharithri/indecommSmartAttendance/backend/ml/image/"
-MODEL_OUTPUT_PATH = "/home/dharithri/indecommSmartAttendance/backend/ml/new_model"
-
+FACE_DATASET_PATH = "backend/ml/image"
+MODEL_OUTPUT_PATH = "backend/ml/new_model"
 # Define the dimensions of the input images
 IMG_HEIGHT = 200
 IMG_WIDTH = 200
@@ -23,7 +22,7 @@ label_to_int = {}
 def load_face_dataset():
     data = []
     labels = []
-    #label_to_int = {}
+    # label_to_int = {}
     for folder in os.listdir(FACE_DATASET_PATH):
         folder_path = os.path.join(FACE_DATASET_PATH, folder)
         if os.path.isdir(folder_path):
@@ -37,7 +36,7 @@ def load_face_dataset():
                 data.append(image)
                 labels.append(label_to_int[folder])
     labels = np.array(labels)
-    return np.array(data), labels
+    return np.array(data), labels,label_to_int
 
 def preprocess_face_dataset(data, labels):
     data = data.astype("float32") / 255.0
@@ -49,8 +48,6 @@ def preprocess_face_dataset(data, labels):
 def create_cnn_model():
     model = tf.keras.models.Sequential([
         tf.keras.layers.Conv2D(32, (3, 3), activation="relu", input_shape=(IMG_HEIGHT, IMG_WIDTH, 1)), # Set input shape to (IMG_HEIGHT, IMG_WIDTH, 1) with one channel
-        tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Conv2D(64, (3, 3), activation="relu"),
         tf.keras.layers.MaxPooling2D((2, 2)),
         tf.keras.layers.Conv2D(64, (3, 3), activation="relu"),
         tf.keras.layers.MaxPooling2D((2, 2)),
@@ -73,7 +70,7 @@ def save_model(model):
     model.save(MODEL_OUTPUT_PATH)
 
 # Load the face dataset
-data, labels = load_face_dataset()
+data, labels,label_to_int = load_face_dataset()
 
 # Preprocess the face dataset
 data, labels = preprocess_face_dataset(data, labels)
@@ -84,14 +81,13 @@ model = train_cnn_model(data, labels)
 
 # Save the trained model
 save_model(model)
-folder_path = '/home/dharithri/indecommSmartAttendance/backend/ml/test/'
+folder_path = 'backend/ml/new_model'
 
 
 cascade_dir = os.path.join(os.path.dirname(cv2.__file__), "data", "haarcascade_frontalface_default.xml")
 face_classifier = cv2.CascadeClassifier(cascade_dir)
 
-video_path = '/home/dharithri/indecommSmartAttendance/backend/ml/test/Ashay.mp4'
-
+video_path = 'backend/ml/Video/Athul.mp4'
 
 def face_extractor(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -107,6 +103,7 @@ def face_extractor(img):
 
 # create a VideoCapture object to read from the video file
 cap = cv2.VideoCapture(video_path)
+predicted_label=" "
 
 while True:
     # read a frame from the video
@@ -129,16 +126,11 @@ while True:
 
         if predicted_label_index in label_names:
             predicted_label = label_names[predicted_label_index]
-            print(predicted_label)
          
     else:
         pass
-
-
+  
 print("Recognised Face:", predicted_label)
-
-    
-
 
    
 
