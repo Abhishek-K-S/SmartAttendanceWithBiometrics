@@ -13,7 +13,11 @@ cascade_dir = os.path.join(os.path.dirname(cv2.__file__), "data", "haarcascade_f
 face_classifier = cv2.CascadeClassifier(cascade_dir)
 
 def face_detection(img, size=0.5):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_to_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+    img_to_yuv[:,:,0] = cv2.equalizeHist(img_to_yuv[:,:,0])
+    face = cv2.cvtColor(img_to_yuv, cv2.COLOR_YUV2BGR)
+    gray = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
     roi = []
     faces = face_classifier.detectMultiScale(gray, 1.3, 5)
     if len(faces)==0:
@@ -33,6 +37,9 @@ while True:
         break;
     image, face = face_detection(frame)
     try:
+        img_to_yuv = cv2.cvtColor(face, cv2.COLOR_BGR2YUV)
+        img_to_yuv[:,:,0] = cv2.equalizeHist(img_to_yuv[:,:,0])
+        face = cv2.cvtColor(img_to_yuv, cv2.COLOR_YUV2BGR)
         face = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
         #Here predict is the inbulit function which returns a tuple (name, confidence)
         result = face_recognizer.predict(face)
@@ -60,9 +67,9 @@ while True:
 
 result_list.sort(reverse=True)
 best_arr = result_list[0: int(len(result_list)/2)]
-avg = (sum(best_arr) / len(best_arr)) if len(result_list) >0 else 0
+avg = (sum(best_arr) / len(best_arr)) if len(best_arr) >0 else 0
 print("average arr", avg)
-if avg >= 80:
+if avg >= 82.5:
     print(True)
 else:
     print(False)

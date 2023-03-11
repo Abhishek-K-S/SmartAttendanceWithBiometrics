@@ -47,6 +47,7 @@ app.post('/register', regUpload.single('register'), async (req, res) =>{
         let result = trainFace(filename, user._id)
         if(result.code == 200){
             //model is created
+            console.log("user registerd with id"+ user._id + " name: "+name)
             res.status(201).json({message: result.text})
         }
         else{
@@ -67,6 +68,7 @@ app.post('/register', regUpload.single('register'), async (req, res) =>{
 app.post('/login', verUpload.single('verify'), async (req, res) =>{
     const filename = req['filename']
     //verfiy the user
+    console.log('tryingto login')
     try {
         if(!req.body.employeeID || !req.body.latitude || !req.body.longitude){
             throw Error('User not authorized')
@@ -101,7 +103,7 @@ app.post('/login', verUpload.single('verify'), async (req, res) =>{
             throw Error("User doesn't exists. Register before logging in")
         }
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
         //Cahnge the error message if its from the db
         if(error.code == 11000)
             error.message = "Invalid user creadentials."
@@ -156,6 +158,7 @@ app.post('/logout', async (req, res) => {
             await Attendance.updateOne({_id: attendance._id}, {uid: "undefined"}).catch(err =>{
                 throw Error(err)
             })
+            console.log("user logging out " + attendance.employeeID)
             res.status(200).json({message: "Successfully loged out"})
         }
         else{

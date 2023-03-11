@@ -7,8 +7,8 @@ const authRoutes = [
     '/logout'
 ]
 
-// const host = "http://192.168.79.167:9999";
-const host = "http://192.168.1.44:9999";
+const host = "http://192.168.224.167:9999";
+// const host = "http://192.168.1.44:9999";
 
 const router_get = (route, data) =>{
     return axios.get(host+route)
@@ -32,7 +32,8 @@ export const router_post = async (route, body, multipart) =>{
     }
 
     await AsyncStorage.getItem('uid').then(value =>{
-        body['uid'] = value;
+        if(value)
+            body['uid'] = value;
     }).catch(err => console.log("uid value is not present in the async storage "))
 
     console.log(body);
@@ -43,7 +44,7 @@ export const router_post = async (route, body, multipart) =>{
     }
 
     return axios.post(host+route, body, { headers: multipart ? headers: {}}).then(res =>{
-        if(res.data['uid']){
+        if(res && res.data && res.data['uid']){
             AsyncStorage.setItem('uid', res.data.uid)
             delete res.data.uid
         }
@@ -56,5 +57,6 @@ export const router_post = async (route, body, multipart) =>{
         if(err.response && err.response.status == 401 && route === '/logout'){
             AsyncStorage.removeItem('uid')
         }
+        throw err
     })
 }

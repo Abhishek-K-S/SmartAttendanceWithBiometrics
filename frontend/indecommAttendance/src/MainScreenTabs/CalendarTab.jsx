@@ -2,6 +2,8 @@ import { StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react';
 import { Calendar, Agenda } from 'react-native-calendars';
 import { router_post } from '../../services/server.service';
+import BottomSheet from '@gorhom/bottom-sheet';
+
 
 
 // https://github.com/wix/react-native-calendars#readme
@@ -60,11 +62,6 @@ const CalendarTab = () => {
                 console.log(`login: ${ele.login} ${ele.loginTime}, logout: ${ele.logout} ${ele.logoutTime}`)
             }
         })
-    }
-
-    function calcAbesense(){
-        //avoid sundays adn saturdays
-        //before this methode, optimaize the array to store multiple data into a single object
     }
 
     console.log("att list", attendanceList)

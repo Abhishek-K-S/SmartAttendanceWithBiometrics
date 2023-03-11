@@ -30,14 +30,15 @@ const MainScreen = ({navigation, route}) => {
                 formdata.append('longitude', finalLocation.longitude)
                 // console.log(formdata)
                 router_post('/login', formdata, true).then(res =>{
-                    // console.log("response is", res.data)
+                    console.log("response is", res.data)
                     setName(res.data['name'])
                     AsyncStorage.setItem('name', res.data['name']);
                     setShowLoader(false)
                 })
                 .catch(err => { 
                     // console.error(err.response.data.message)
-                    ToastAndroid.show("Couldn't verify the user. Try again", ToastAndroid.LONG)
+                    console.log(err.response)
+                    ToastAndroid.show(err.response ? err.response.data.message: "Couldn't verify the user. Try again", ToastAndroid.LONG)
                     // navigation.popToTop();
                     navigation.replace('Home')
                 });
@@ -54,13 +55,6 @@ const MainScreen = ({navigation, route}) => {
                 })
             }
         })()
-
-        function getAttendance(){
-            router_post('/attendance', {}).then(res =>{
-                console.log(res.data.attendanceList); 
-                setAttendanceList(res.data.attendanceList)
-            })
-        }
     },[])
 
     const logout = () =>{

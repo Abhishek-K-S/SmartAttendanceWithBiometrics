@@ -76,7 +76,7 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
                  ToastAndroid.show('Registered successfully', ToastAndroid.LONG)
                  navigation.popToTop();
                  navigation.replace('Home')
-            }).catch(err => { console.error(err.response) });
+            }).catch(err => { console.error(err.message) });
             setLoading(false)
 
             //emptied the stack and made sure user cannot exit mainScreen and go back to homScreen. Need to change it later on
