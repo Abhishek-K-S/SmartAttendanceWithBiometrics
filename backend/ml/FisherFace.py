@@ -58,11 +58,14 @@ def train_classifier(features, labels):
     return clf
 
 def recognize_face(new_img, mean_face, eigenvectors, clf):
-       # Flatten the new image into a 1D array
+    # Resize the new image to (128, 128)
+    new_img = cv2.resize(new_img, (128, 128))
+
+    # Flatten the new image into a 1D array
     new_img_flattened = new_img.flatten()
 
     # Subtract the mean face from the flattened image
-    new_img_centered = new_img_flattened - mean_face
+    new_img_centered = new_img_flattened - mean_face.flatten()
 
     # Project the centered image onto the eigenface subspace
     new_feature = np.dot(new_img_centered, eigenvectors)
