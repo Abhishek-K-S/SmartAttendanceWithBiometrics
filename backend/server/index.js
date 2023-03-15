@@ -4,6 +4,7 @@ const cors = require('cors')
 const uuid = require('uuid')
 const fs = require('fs');
 const path = require('path')
+const bodyParser = require('body-parser')
 require('dotenv').config()
 
 
@@ -22,6 +23,7 @@ const corsOption = {
     optionSuccessStatus: 200
 } 
 app.use(cors(corsOption))
+app.use(bodyParser.json())
 
 //register the user and train a model from the given video
 app.post('/register', regUpload.single('register'), async (req, res) =>{
@@ -45,6 +47,7 @@ app.post('/register', regUpload.single('register'), async (req, res) =>{
         let result = trainFace(filename, user._id)
         if(result.code == 200){
             //model is created
+            console.log("user registerd with id"+ user._id + " name: "+name)
             res.status(201).json({message: result.text})
         }
         else{
@@ -63,15 +66,19 @@ app.post('/register', regUpload.single('register'), async (req, res) =>{
 })
 
 app.post('/login', verUpload.single('verify'), async (req, res) =>{
+    const filename = req['filename']
     //verfiy the user
+    console.log('tryingto login')
     try {
         if(!req.body.employeeID || !req.body.latitude || !req.body.longitude){
             throw Error('User not authorized')
         }
         const { employeeID, latitude, longitude } = req.body;
-        const filename = req['filename']
-        //check if user already logged in using employee id
-        const user = await this.findOne({employeeID});
+        if(isNaN(latitude) || isNaN(longitude)){
+            throw Error('Invalid location')
+        }
+        //check if user already registered in using employee id
+        const user = await User.findOne({employeeID});
         if(user){
             //code to match the location perimeter
             //if inside locatin, then put attendance, else throw an error
@@ -84,9 +91,10 @@ app.post('/login', verUpload.single('verify'), async (req, res) =>{
                 //generate a uid randomly, store a copy in db for later to verify, and send 1 copy to user to send it when logout to verify
                 let uid = uuid.v4()
                 //create attendance
-                await Attendance.create({employeeID, loginTime: new Date().toString(), uid}).catch(err=> {throw err})
+                await Attendance.create({employeeID, uid}).catch(err=> {throw err})
+                // await Attendance.markAttendance(employeeID, uid).catch(err => {throw err});
                 //try to put uid in cookies and fetch the same later
-                res.status(200).json({message: 'Login successful', uid})
+                res.status(200).json({message: 'Login successful', uid, name: user.name, employeeID: user.employeeID})
             }
             else{
                 throw Error('You are not allowed to login outside the orgainzation location.')
@@ -95,6 +103,7 @@ app.post('/login', verUpload.single('verify'), async (req, res) =>{
             throw Error("User doesn't exists. Register before logging in")
         }
     } catch (error) {
+        console.log(error.message)
         //Cahnge the error message if its from the db
         if(error.code == 11000)
             error.message = "Invalid user creadentials."
@@ -105,51 +114,58 @@ app.post('/login', verUpload.single('verify'), async (req, res) =>{
 
 //get the list of user attendance
 app.post('/attendance', async (req, res) =>{
-    
+    console.log('request to attendance')
     try{
         if(!req.body.employeeID || ! req.body.uid){
             throw Error()
         }
         const { employeeID, uid } = req.body
+        //check if hte user is valid or not, if not exit the request
+        const user = User.findOne({employeeID}).catch(err=>{ throw err })
+        if(!user){
+            throw Error()
+        }
         //get current user, if logged in but not logged out
         const attendance = await Attendance.findOne({employeeID, uid}).catch(err=>{throw err})
-        if(attendance && !attendance.logoutTime ){
+        if(attendance && attendance.createdAt.toISOString() === attendance.updatedAt.toISOString() ){
             //if user logged in, then get the list
             const attList = await Attendance.find({employeeID}).catch(err =>{ throw err})
             let attendanceList = [];
             //send only reuqired information to the front end
-            for(let a in attList){
-                attendanceList.push({id: a.uid, login: a.loginTime, logout: a.logoutTime })
+            for(let a of attList){
+                attendanceList.push({login: a.createdAt, logout: a.updatedAt})
             }
-            res.status(200).json(attendanceList);
+            res.status(200).json({attendanceList, accountCreatedOn: user.createdAt});
         }
     } catch(err){
-        res.status(400).json({message: "Couldn't fetch attendance list"})
+        console.log(err)
+        res.status(401).json({message: "Couldn't fetch attendance list"})
     }
 })
 
-app.get('/logout', async (req, res) => {
+app.post('/logout', async (req, res) => {
     //check if user with id exists
     try {
         if(!req.body.employeeID || ! req.body.uid){
-            throw Error()
+            throw Error("emp id and uid is not avaialable")
         }
         const { employeeID, uid } = req.body
         
         //check if user is logged in and not logged out yet
         const attendance = await Attendance.findOne({employeeID, uid}).catch(err=>{throw err})
-        if(attendance && !attendance.logoutTime){
+        if(attendance && attendance.createdAt.toISOString()===attendance.updatedAt.toISOString()){
             //update the logout time
-            await Attendance.updateOne({_id: attendance._id}, {logoutTime: new Date().toString()}).catch(err =>{
+            await Attendance.updateOne({_id: attendance._id}, {uid: "undefined"}).catch(err =>{
                 throw Error(err)
             })
+            console.log("user logging out " + attendance.employeeID)
             res.status(200).json({message: "Successfully loged out"})
         }
         else{
             throw Error("User not authorized")
         }
     } catch (error) {
-        res.status(400).json({message: "User not authorized"})
+        res.status(401).json({message: "User not authorized"})
     }
 })
 

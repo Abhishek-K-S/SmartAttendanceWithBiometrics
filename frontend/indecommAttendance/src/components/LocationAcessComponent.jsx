@@ -17,7 +17,7 @@ const LocationAcessComponent = ({ pull_loc }) => {
                 return
             }
 
-            let location = await Location.getCurrentPositionAsync({})
+            let location = await Location.getLastKnownPositionAsync()
             setLocation(location)
         })()
     }, [])

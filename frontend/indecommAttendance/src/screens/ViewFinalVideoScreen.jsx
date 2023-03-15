@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from 'react-native'
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Video } from 'expo-av';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import LocationAcessComponent from '../components/LocationAcessComponent';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet from "@gorhom/bottom-sheet";
 import { FAB } from 'react-native-elements';
-import { router_post } from '../../services/server.service'
+import { router_post } from '../../services/server.service.js'
 
 const ViewFinalVideoScreen = ({ route, navigation }) => {
     const video = React.useRef(null);
@@ -43,6 +43,13 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
     );
 
     const pull_loc = (lat, long) => {
+        if(!lat || !long){
+            ToastAndroid.show("Couldn't get user location", ToastAndroid.LONG)
+            setTimeout(() => {
+                navigation.popToTop()
+                navigation.replace('Home');
+            }, 2000);
+        }
         // console.log(lat + " ");
         // console.log(long);
         setFinalLocation({
@@ -53,9 +60,13 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
     }
 
     const sendData = () => {
-        if (userData == {}) {
-            setLoading(true);
-            console.log(userData);
+        setLoading(true);
+        if (userData == {} || !uri) {
+            ToastAndroid.show('Invalid user data. Please try again', ToastAndroid.LONG)
+            setTimeout(() => {
+                navigation.popToTop();
+                navigation.replace('Home')
+            }, 2000);
         }
         else {
             let formdata = new FormData();
@@ -64,18 +75,28 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
                 type: "video/mp4",
                 name: userData.euData.ueid + '.mp4'
             });
-            console.log(userData.uri)
+            
             formdata.append('name', userData.euData.uname);
             formdata.append('employeeID', userData.euData.ueid)
             formdata.append('latitude', userData.finalLocation.latitude)
             formdata.append('longitude', userData.finalLocation.longitude)
+            
             // console.log(formdata)
-            router_post('/register', formdata, true).then(res => console.log("response is", res.data)).catch(err => { console.error(err.response) });
+            router_post('/register', formdata, true).then(res =>{
+                 console.log("response is", res.data);
+                 ToastAndroid.show('Registered successfully', ToastAndroid.LONG)
+                 navigation.popToTop();
+                 navigation.replace('Home')
+            }).catch(err => {
+                ToastAndroid.show(err.response ? err.response.data.message: "Couldn't verify the user. Try again", ToastAndroid.LONG)
+                setTimeout(() => {
+                    navigation.popToTop();
+                    navigation.replace('Home');
+                }, 2000);
+            });
             setLoading(false)
 
             //emptied the stack and made sure user cannot exit mainScreen and go back to homScreen. Need to change it later on
-            navigation.popToTop();
-            navigation.replace('MainScreen')
         }
     }
 

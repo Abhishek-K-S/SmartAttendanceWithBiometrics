@@ -1,9 +1,22 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import {  Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeScreen = ({ navigation }) => {
-
+    useEffect(()=>{
+        (async ()=>{
+            await AsyncStorage.getItem('uid')
+            .then((val) =>{
+                console.log(val, val.length)
+                navigation.replace('MainScreen',{
+                    doLogin: false
+                })
+            })
+            .catch(err =>{
+            })
+        })()
+    }, [])
 
 
     return (

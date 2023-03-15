@@ -1,26 +1,30 @@
-import { Button, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Button, KeyboardAvoidingView, StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { Camera } from 'expo-camera'
 import { Video } from 'expo-av';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import { FAB } from 'react-native-elements';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LocationAcessComponent from '../components/LocationAcessComponent';
+import { router_post } from '../../services/server.service';
+import * as Location from 'expo-location'
 
 const LoginScreen = ({ navigation }) => {
 
     const [hasAudioPermission, setHasAudioPermission] = useState(null);
     const [hasCameraPermission, setHasCameraPermission] = useState(null);
+    const [hasLocationPermission, setHasLocationPermission] = useState(null)
     const [camera, setCamera] = useState(null);
     const [record, setRecord] = useState(null);
     const [type, setType] = useState(Camera.Constants.Type.front);
     const video = React.useRef(null);
     const [status, setStatus] = React.useState({});
     const [isModalVisible, setModalVisible] = useState(true);
-    const [name, setName] = useState("");
+    // const [name, setName] = useState("");
     const [eid, seteid] = useState("")
     const [uData, setUData] = useState({})
-
-    const nameRef = useRef(null)
+    const [finalLocation, setFinalLocation] = useState({})
     const inputRef = useRef(null)
 
     useEffect(() => {
@@ -30,28 +34,63 @@ const LoginScreen = ({ navigation }) => {
 
             const audioStatus = await Camera.requestMicrophonePermissionsAsync();
             setHasAudioPermission(audioStatus.status === "granted");
+
+            const { status } = await Location.requestForegroundPermissionsAsync()
+            setHasLocationPermission(status === "granted")
+
+            await AsyncStorage.getItem('employeeID').then( val =>{
+                if(val){
+                    seteid(val)
+                }
+            }).catch()
+
+            let location = await Location.getLastKnownPositionAsync({})
+            console.log(location)
+            if(location && !location.mocked){
+                setFinalLocation({
+                    latitude: location.coords.latitude,
+                    longitude: location.coords.longitude
+                })
+            }
+            else{
+                ToastAndroid.show('Location is unavailable. Unable location to proceed. Stop any of third party location providers', ToastAndroid.LONG)
+                setTimeout(()=>{
+                    navigation.popToTop();
+                    navigation.replace('Home')
+                }, 2000)
+            }
         })();
+
     }, []);
+
+    useEffect(()=>{
+        if(hasAudioPermission===false || hasCameraPermission===false || hasLocationPermission===false){
+            ToastAndroid.show('Location, camera and microphone permissions are required', ToastAndroid.LONG)
+            navigation.popToTop();
+            navigation.replace('Home')
+        }
+    },[hasAudioPermission, hasCameraPermission, hasLocationPermission])
 
 
     //Possible changes for async storage must be added to save user state.
     useEffect(() => {
-        if (record && uData) {
+        if (record && uData && finalLocation.latitude) {
+            // navigation.popToTop();
             navigation.popToTop();
-
+            navigation.replace('MainScreen',{
+                uData,
+                finalLocation,
+                record, 
+                doLogin: true
+            })
             //change it to .replace if no back flow option needed **
-            navigation.navigate('MainScreen', {
-                uri: record,
-                euData: uData,
-            });
+            
         }
-    }, [record, navigation, uData]);
-
-
+    }, [record, uData, finalLocation]);
 
     const takeVideo = async () => {
         if (camera) {
-            const data = await camera.recordAsync({
+            let data = await camera.recordAsync({
                 maxDuration: 2,
             });
             setRecord(data.uri);
@@ -69,27 +108,23 @@ const LoginScreen = ({ navigation }) => {
     if (hasCameraPermission === false || hasAudioPermission === false) {
         return <Text>No access to camera</Text>;
     }
+    if(!hasLocationPermission){
+        return <Text>Cannot access location</Text>
+    }
 
     const toggleModal = () => {
-        if (name !== "" && eid !== "") {
+        if (eid && eid.length !== 0) {
             // console.log(name);
             // console.log(eid);
             let data = {
-                uname: name,
                 ueid: eid,
             }
             setUData(data)
             setModalVisible(!isModalVisible);
             // console.log(uData)
         } else {
-            alert('Please enter your username and employee id')
-            if (name == "") {
-                nameRef.current.focus();
-            } else if (eid == "") {
-                inputRef.current.focus();
-            } else {
-                nameRef.current.focus();
-            }
+            alert('employee id')
+            inputRef.current.focus();
         }
     };
 
@@ -100,15 +135,14 @@ const LoginScreen = ({ navigation }) => {
                     ref={ref => setCamera(ref)}
                     style={styles.fixedRatio}
                     type={type}
-                    ratio={'4:3'} />
+                    ratio={'4:3'}
+                     />
             </View>
-
             <Modal style={{ height: "50%", width: "90%", }} isVisible={isModalVisible}>
                 <KeyboardAvoidingView style={styles.modalContainer}>
                     <FAB color='white' icon={{ name: 'close', color: '#1E254D' }} placement="right" style={{ top: -350, zIndex: 99 }} onPress={() => { navigation.replace('Home') }} />
                     <View style={styles.mainHolder}>
-                        <TextInput autoFocus placeholder='Enter your name' placeholderTextColor="white" style={styles.formInput} onChangeText={(value) => { setName(value) }} ref={nameRef} onSubmitEditing={() => { inputRef.current.focus() }} />
-                        <TextInput placeholder='Enter your employee id' placeholderTextColor="white" style={styles.formInput} ref={inputRef} onChangeText={(value) => { seteid(value) }} onSubmitEditing={() => { toggleModal() }} />
+                        <TextInput placeholder='Enter your employee id' placeholderTextColor="white" style={styles.formInput} ref={inputRef} onChangeText={(value) => { seteid(value) }} value={eid} onSubmitEditing={() => { toggleModal() }} />
                         <TouchableOpacity style={{ backgroundColor: "white", width: "100%", height: "20%", justifyContent: "center", borderRadius: 15 }} onPress={() => toggleModal()} >
                             <Text style={{ textAlign: "center", color: "#1E254D" }}>Continue</Text>
                         </TouchableOpacity>
@@ -141,7 +175,6 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={styles.btnText}>Stop Video</Text>
                 </TouchableOpacity> */}
             </View>
-
 
         </View>
     )
