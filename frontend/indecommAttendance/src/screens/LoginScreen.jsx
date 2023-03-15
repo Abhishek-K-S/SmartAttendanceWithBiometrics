@@ -39,24 +39,25 @@ const LoginScreen = ({ navigation }) => {
             setHasLocationPermission(status === "granted")
 
             await AsyncStorage.getItem('employeeID').then( val =>{
-                console.log("value is " +val, typeof(val))
                 if(val){
-                    console.log("setting value "+ val);
-                    setUData({
-                        ueid: val
-                    })
-
-                    setModalVisible(false);
+                    seteid(val)
                 }
-            }).catch(err => console.log("employee isn't present in the storage, getting it manually"))
+            }).catch()
 
             let location = await Location.getLastKnownPositionAsync({})
             console.log(location)
-            if(location){
+            if(location && !location.mocked){
                 setFinalLocation({
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude
                 })
+            }
+            else{
+                ToastAndroid.show('Location is unavailable. Unable location to proceed. Stop any of third party location providers', ToastAndroid.LONG)
+                setTimeout(()=>{
+                    navigation.popToTop();
+                    navigation.replace('Home')
+                }, 2000)
             }
         })();
 
@@ -137,12 +138,11 @@ const LoginScreen = ({ navigation }) => {
                     ratio={'4:3'}
                      />
             </View>
-
             <Modal style={{ height: "50%", width: "90%", }} isVisible={isModalVisible}>
                 <KeyboardAvoidingView style={styles.modalContainer}>
                     <FAB color='white' icon={{ name: 'close', color: '#1E254D' }} placement="right" style={{ top: -350, zIndex: 99 }} onPress={() => { navigation.replace('Home') }} />
                     <View style={styles.mainHolder}>
-                        <TextInput placeholder='Enter your employee id' placeholderTextColor="white" style={styles.formInput} ref={inputRef} onChangeText={(value) => { seteid(value) }} onSubmitEditing={() => { toggleModal() }} />
+                        <TextInput placeholder='Enter your employee id' placeholderTextColor="white" style={styles.formInput} ref={inputRef} onChangeText={(value) => { seteid(value) }} value={eid} onSubmitEditing={() => { toggleModal() }} />
                         <TouchableOpacity style={{ backgroundColor: "white", width: "100%", height: "20%", justifyContent: "center", borderRadius: 15 }} onPress={() => toggleModal()} >
                             <Text style={{ textAlign: "center", color: "#1E254D" }}>Continue</Text>
                         </TouchableOpacity>

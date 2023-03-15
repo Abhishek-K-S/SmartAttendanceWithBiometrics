@@ -43,6 +43,13 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
     );
 
     const pull_loc = (lat, long) => {
+        if(!lat || !long){
+            ToastAndroid.show("Couldn't get user location", ToastAndroid.LONG)
+            setTimeout(() => {
+                navigation.popToTop()
+                navigation.replace('Home');
+            }, 2000);
+        }
         // console.log(lat + " ");
         // console.log(long);
         setFinalLocation({
@@ -53,9 +60,13 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
     }
 
     const sendData = () => {
-        if (userData == {}) {
-            setLoading(true);
-            console.log(userData);
+        setLoading(true);
+        if (userData == {} || !uri) {
+            ToastAndroid.show('Invalid user data. Please try again', ToastAndroid.LONG)
+            setTimeout(() => {
+                navigation.popToTop();
+                navigation.replace('Home')
+            }, 2000);
         }
         else {
             let formdata = new FormData();
@@ -76,7 +87,13 @@ const ViewFinalVideoScreen = ({ route, navigation }) => {
                  ToastAndroid.show('Registered successfully', ToastAndroid.LONG)
                  navigation.popToTop();
                  navigation.replace('Home')
-            }).catch(err => { console.error(err.message) });
+            }).catch(err => {
+                ToastAndroid.show(err.response ? err.response.data.message: "Couldn't verify the user. Try again", ToastAndroid.LONG)
+                setTimeout(() => {
+                    navigation.popToTop();
+                    navigation.replace('Home');
+                }, 2000);
+            });
             setLoading(false)
 
             //emptied the stack and made sure user cannot exit mainScreen and go back to homScreen. Need to change it later on
