@@ -7,6 +7,7 @@ from tensorflow import keras
 # Define the paths to the face dataset and output model
 FACE_DATASET_PATH = "backend/ml/image"
 MODEL_OUTPUT_PATH = "backend/ml/new_model"
+
 # Define the dimensions of the input images
 IMG_HEIGHT = 200
 IMG_WIDTH = 200
@@ -22,7 +23,7 @@ label_to_int = {}
 def load_face_dataset():
     data = []
     labels = []
-    # label_to_int = {}
+    #label_to_int = {}
     for folder in os.listdir(FACE_DATASET_PATH):
         folder_path = os.path.join(FACE_DATASET_PATH, folder)
         if os.path.isdir(folder_path):
@@ -36,11 +37,16 @@ def load_face_dataset():
                 data.append(image)
                 labels.append(label_to_int[folder])
     labels = np.array(labels)
-    return np.array(data), labels,label_to_int
+    print(labels)
+    return np.array(data), labels
 
 def preprocess_face_dataset(data, labels):
     data = data.astype("float32") / 255.0
+    print(data)
+    print(labels)
+    print(NUM_CLASSES)
     labels = tf.keras.utils.to_categorical(labels, NUM_CLASSES)
+    print(labels)
     data = np.expand_dims(data, axis=-1) # Add an extra dimension to the input data
     return data, labels
 
@@ -70,7 +76,7 @@ def save_model(model):
     model.save(MODEL_OUTPUT_PATH)
 
 # Load the face dataset
-data, labels,label_to_int = load_face_dataset()
+data, labels = load_face_dataset()
 
 # Preprocess the face dataset
 data, labels = preprocess_face_dataset(data, labels)
@@ -88,6 +94,7 @@ cascade_dir = os.path.join(os.path.dirname(cv2.__file__), "data", "haarcascade_f
 face_classifier = cv2.CascadeClassifier(cascade_dir)
 
 video_path = 'backend/ml/Video/Athul.mp4'
+
 
 def face_extractor(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -128,9 +135,7 @@ while True:
             predicted_label = label_names[predicted_label_index]
          
     else:
+    
         pass
   
 print("Recognised Face:", predicted_label)
-
-   
-
