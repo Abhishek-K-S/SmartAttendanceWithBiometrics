@@ -14,6 +14,21 @@ frontend/indecommAttendance/web-build/
 # macOS
 frontend/indecommAttendance/.DS_Store
 
+##admin
+frontend/admin/node_modules
+frontend/admin/.pnp
+frontend/admin/.pnp.js
+frontend/admin/coverage
+frontend/admin/build
+frontend/admin/.DS_Store
+frontend/admin/.env.local
+frontend/admin/.env.development.local
+frontend/admin/.env.test.local
+frontend/admin/.env.production.local
+frontend/admin/npm-debug.log*
+frontend/admin/yarn-debug.log*
+frontend/admin/yarn-error.log*
+
 ###machine learning
 backend/ml/image
 
@@ -21,7 +36,10 @@ backend/ml/model
 
 backend/ml/Video
 
+
 ###server ignore
+backend/server/ml/cnn/image
+backend/server/ml/cnn/model
 backend/server/node_modules
 backend/server/verification
 backend/server/registration
