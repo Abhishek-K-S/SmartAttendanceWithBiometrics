@@ -35,6 +35,8 @@ backend/ml/image
 backend/ml/model
 
 backend/ml/Video
+backend/ml/Eigen
+backend/ml/new_model
 
 
 ###server ignore
