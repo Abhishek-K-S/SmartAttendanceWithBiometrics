@@ -9,7 +9,8 @@ require('dotenv').config()
 
 
 const { regUpload, verUpload } = require("./config/multer.config")
-const { trainFace, verifyFace } =  require('./services/ml.service')
+// const { trainFace, verifyFace } =  require('./services/ml.service')
+const { trainFace, verifyFace } = require('./services/mlcnn.service');
 const { insidePrimeter } = require('./services/mapDistance.service')
 
 require('./config/mongodb.config')()
@@ -62,7 +63,7 @@ app.post('/register', regUpload.single('register'), async (req, res) =>{
             error.message = "User already registered. Please login to proceed"
         res.status(400).json({message: error.message});
     }
-    fs.rm(path.join(__dirname, "registration", filename), (err)=>{}) //remove video file from the system.
+    // fs.rm(path.join(__dirname, "registration", filename), (err)=>{}) //remove video file from the system.
 })
 
 app.post('/login', verUpload.single('verify'), async (req, res) =>{
