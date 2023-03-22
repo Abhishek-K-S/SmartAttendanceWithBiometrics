@@ -7,10 +7,12 @@ const path = require('path')
 const bodyParser = require('body-parser')
 require('dotenv').config()
 
+const authRoutes = require('./authRoutes')
 
 const { regUpload, verUpload } = require("./config/multer.config")
-// const { trainFace, verifyFace } =  require('./services/ml.service')
-const { trainFace, verifyFace } = require('./services/mlcnn.service');
+const { trainFace, verifyFace } =  require('./services/ml.service')
+// const { trainFace, verifyFace } = require('./services/mlcnn.service');
+// const { trainFace, verifyFace } = require('./services/mlfisher.service');
 const { insidePrimeter } = require('./services/mapDistance.service')
 
 require('./config/mongodb.config')()
@@ -25,6 +27,8 @@ const corsOption = {
 } 
 app.use(cors(corsOption))
 app.use(bodyParser.json())
+
+app.use(authRoutes)
 
 //register the user and train a model from the given video
 app.post('/register', regUpload.single('register'), async (req, res) =>{

@@ -1,15 +1,17 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Login from './components/login';
-import Error404 from './components/error404';
+import React, {useContext, useState} from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { userContext } from './components/assets/userContext'; 
+import RoutingHandler from './components/RoutingHandler';
 
 function App() {
+  const context = useContext(userContext)
+  const [user, setUser] = useState({authUser: context?.authUser})
+  
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path='/login' element={<Login/>} />
-        <Route  path='*' element={<Error404/>} />
-      </Routes>
+      <userContext.Provider value={{authUser: user.authUser || false, user, setUser}}>
+        <RoutingHandler/>
+      </userContext.Provider>
     </BrowserRouter>
   )
 }

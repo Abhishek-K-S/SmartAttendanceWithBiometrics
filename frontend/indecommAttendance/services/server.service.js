@@ -7,7 +7,7 @@ const authRoutes = [
     '/logout'
 ]
 
-const host = "http://192.168.113.167:9999";
+const host = "http://192.168.193.167:9999";
 // const host = "http://192.168.1.44:9999";
 
 const router_get = (route, data) =>{
