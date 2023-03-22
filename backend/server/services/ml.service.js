@@ -1,9 +1,11 @@
 const { spawnSync } = require('child_process');
+const fs = require('fs');
 
 const trainFace = (filename, id) =>{
     //take the file and generate model accordingly, save it with the name of id and store in ml/model folder
     const pythonGeneration = runPythonSync([ 'ml/preprocessing.py', filename, id ]);
     console.log(pythonGeneration.stderr)
+    fs.rm(path.join(__dirname, "registration", filename), (err)=>{})
     if(parseInt(pythonGeneration.status) === 0){
         //continue only if python properly exists after procesing
         return {code: 200, text: "Completed the processing"};

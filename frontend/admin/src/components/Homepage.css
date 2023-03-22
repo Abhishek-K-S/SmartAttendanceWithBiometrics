@@ -1,0 +1,49 @@
+.bgGray{
+    background: rgb(24, 94, 160);
+    color: white;
+    border-radius: 4px;
+  
+}
+
+.textLeft{
+  text-align: left;
+}
+
+.firstCap{
+  text-transform: capitalize;
+}
+
+.lowerBorder{
+  border-bottom: solid 1px rgb(219, 219, 219);
+}
+
+.greyText{
+  color: gray;
+}
+
+.scroll{
+  max-height: 60vh;
+  overflow-y: scroll;
+}
+
+.sticky{
+  position: sticky;
+}
+
+.card{
+  display: inline-block;
+  width: 40%;
+  aspect-ratio: 1/1;
+}
+
+.flexCenter{
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.bigText{
+  font-size: 3.5rem;
+}
