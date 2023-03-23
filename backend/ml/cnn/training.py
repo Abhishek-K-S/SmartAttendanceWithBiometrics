@@ -66,13 +66,7 @@ def train_cnn_model(data, labels, num_classes):
 
 video_path = 'backend/ml/test/Athul.mp4'
 f_name=0
-# training_data = []
-# labels = []
 
-# for idx, video_file in enumerate(os.listdir(video_dir)):
-#     video_path = os.path.join(video_dir, video_file)
-#     f_name = idx 
-#     print(f_name)
 data, label = data_generation(f_name, video_path)
 #     training_data.append(data)
 #     labels.append(label)
