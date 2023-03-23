@@ -3,7 +3,6 @@ import os
 from tensorflow import keras
 
 
-# MODEL_OUTPUT_PATH = os.path.abspath(os.getcwd())
 curr_path = os.path.abspath(os.getcwd())
 
 MODEL_OUTPUT_PATH= os.path.join(curr_path,"backend", "ml", "model")
@@ -21,10 +20,6 @@ def create_cnn_model():
         tf.keras.layers.Dense(1, activation="softmax")
     ])
     model.save("verification.h5")
-
-
-# def save_model(model):
-#     model.save(MODEL_OUTPUT_PATH)
 
 
 create_cnn_model()
